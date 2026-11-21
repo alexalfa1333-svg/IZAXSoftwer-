@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IZAX AGENCY - Software</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+body{background:#050507;color:#fff;min-height:100vh;padding:16px;padding-bottom:100px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.logo{font-weight:800;font-size:22px;letter-spacing:-.02em}.logo span{color:#36d67e}
+.top button{background:#fff;color:#000;border:none;padding:8px 14px;border-radius:8px;font-weight:600;font-size:13px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.card{background:#17171b;border:1px solid #2a2a2e;border-radius:14px;padding:14px}
+.card small{color:#888;font-size:11px;letter-spacing:.1em}.card b{font-size:22px;display:block;margin-top:4px}
+.card.green b{color:#36d67e}.card.orange b{color:#ffb020}
+.tabs{display:flex;gap:8px;margin-bottom:14px;overflow:auto}
+.tab{padding:9px 16px;border-radius:999px;background:#17171b;border:1px solid #2a2a2e;color:#aaa;font-size:13px;white-space:nowrap}
+.tab.active{background:#fff;color:#000;font-weight:600}
+.box{background:#121216;border:1px solid #2a2a2e;border-radius:16px;padding:16px;margin-bottom:14px}
+.box h3{font-size:15px;margin-bottom:12px}
+input,select,textarea{width:100%;background:#050507;border:1px solid #2a2a2e;color:#fff;padding:12px;border-radius:10px;margin-bottom:10px;font-size:14px;outline:none}
+input:focus{border-color:#36d67e}
+.btn{width:100%;background:#36d67e;color:#000;border:none;padding:13px;border-radius:10px;font-weight:700;font-size:14px}
+.btn2{background:#fff;color:#000}
+.item{background:#17171b;border:1px solid #2a2a2e;border-radius:12px;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.item b{font-size:14px}.item small{color:#888;display:block;margin-top:2px}
+.badge{font-size:11px;padding:4px 8px;border-radius:999px;background:#222;color:#36d67e;font-weight:600}
+.badge.pending{background:#33250a;color:#ffb020}.badge.done{background:#0a2e1a;color:#36d67e}
+.del{color:#ff5c5c;background:none;border:none;font-size:18px;margin-left:8px}
+.bill{background:#fff;color:#000;border-radius:16px;padding:20px;margin-bottom:14px}
+.bill h2{font-size:20px}.bill p{font-size:13px;color:#555;margin:2px 0}
+.bill hr{margin:12px 0;border:1px dashed #ddd}
+.bill table{width:100%;font-size:14px}.bill td{padding:4px 0}
+.total{font-weight:800;font-size:18px}
+.float{position:fixed;bottom:16px;left:16px;right:16px;background:#36d67e;color:#000;text-align:center;padding:14px;border-radius:12px;font-weight:700}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="top"><div class="logo">IZAX <span>AGENCY</span><div style="font-size:11px;color:#888;font-weight:400">Agency Management Software</div></div><button onclick="exportData()">⬇ Export</button></div>
+
+<div class="cards">
+<div class="card green"><small>TOTAL INCOME</small><b id="tIncome">₹0</b></div>
+<div class="card orange"><small>PENDING</small><b id="tPending">₹0</b></div>
+<div class="card"><small>CLIENTS</small><b id="tClients">0</b></div>
+<div class="card"><small>PROJECTS</small><b id="tProjects">0</b></div>
+</div>
+
+<div class="tabs">
+<button class="tab active" onclick="show('clients',this)">👥 Clients</button>
+<button class="tab" onclick="show('projects',this)">💼 Projects</button>
+<button class="tab" onclick="show('billing',this)">🧾 Billing</button>
+<button class="tab" onclick="show('bills',this)">📄 Bills List</button>
+</div>
+
+<!-- CLIENTS -->
+<div id="clients">
+<div class="box"><h3>+ Puthu Client Add Pannu</h3>
+<input id="cName" placeholder="Client Peru - Ex: Kumar Jewellery">
+<input id="cPhone" placeholder="Phone Number - 98765 43210">
+<input id="cWork" placeholder="Enna Velai? - Website / Software">
+<button class="btn" onclick="addClient()">Client Save Pannu</button></div>
+<div id="clientList"></div>
+</div>
+
+<!-- PROJECTS -->
+<div id="projects" class="hidden">
+<div class="box"><h3>+ Puthu Project</h3>
+<select id="pClient"><option>Client Select Pannu</option></select>
+<input id="pName" placeholder="Project Peru - Ex: Jewellery Website">
+<select id="pType"><option>Website</option><option>Software</option><option>App</option><option>Logo / Design</option></select>
+<input id="pPrice" type="number" placeholder="Price - Ex: 15000">
+<select id="pStatus"><option>Pending</option><option>Working</option><option>Done</option></select>
+<button class="btn" onclick="addProject()">Project Save Pannu</button></div>
+<div id="projectList"></div>
+</div>
+
+<!-- BILLING -->
+<div id="billing" class="hidden">
+<div class="box"><h3>🧾 Bill Podu</h3>
+<select id="bClient"><option>Client Select Pannu</option></select>
+<input id="bItem" placeholder="Velai - Ex: Website Design">
+<input id="bPrice" type="number" placeholder="Amount - Ex: 15000" oninput="calcBill()">
+<input id="bAdvance" type="number" placeholder="Advance Kuduthanga? - Ex: 5000" oninput="calcBill()">
+<div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px"><span>Balance:</span><b id="bBal" style="color:#ffb020">₹0</b></div>
+<button class="btn" onclick="makeBill()">Bill Create Pannu</button></div>
+<div id="billPreview"></div>
+</div>
+
+<!-- BILLS LIST -->
+<div id="bills" class="hidden"><div id="billList"></div></div>
+
+<div class="float" onclick="show('billing',document.querySelectorAll('.tab')[2])">+ Puthu Bill Podu</div>
+
+<script>
+let clients = JSON.parse(localStorage.getItem('izax_clients')||'[]');
+let projects = JSON.parse(localStorage.getItem('izax_projects')||'[]');
+let bills = JSON.parse(localStorage.getItem('izax_bills')||'[]');
+function save(){ localStorage.setItem('izax_clients',JSON.stringify(clients)); localStorage.setItem('izax_projects',JSON.stringify(projects)); localStorage.setItem('izax_bills',JSON.stringify(bills)); render(); }
+function show(id,el){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); ['clients','projects','billing','bills'].forEach(x=>document.getElementById(x).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+function addClient(){ let n=document.getElementById('cName').value, p=document.getElementById('cPhone').value, w=document.getElementById('cWork').value; if(!n) return alert('Client peru podu da'); clients.push({name:n,phone:p,work:w}); document.getElementById('cName').value=''; document.getElementById('cPhone').value=''; document.getElementById('cWork').value=''; save(); alert('Client Save Aachu ✓'); }
+function addProject(){ let c=document.getElementById('pClient').value, n=document.getElementById('pName').value, t=document.getElementById('pType').value, pr=document.getElementById('pPrice').value, s=document.getElementById('pStatus').value; if(!n) return alert('Project peru podu'); projects.push({client:c,name:n,type:t,price:+pr||0,status:s}); save(); alert('Project Save Aachu ✓'); }
+function calcBill(){ let p=+document.getElementById('bPrice').value||0, a=+document.getElementById('bAdvance').value||0; document.getElementById('bBal').textContent='₹'+(p-a); }
+function makeBill(){ let c=document.getElementById('bClient').value, item=document.getElementById('bItem').value, price=+document.getElementById('bPrice').value||0, adv=+document.getElementById('bAdvance').value||0; if(!item) return alert('Velai enna nu podu'); let id='IZAX-'+(1000+bills.length+1); let b={id,client:c,item,price,adv,bal:price-adv,date:new Date().toLocaleDateString('en-IN')}; bills.push(b); save();
+document.getElementById('billPreview').innerHTML=`<div class="bill"><h2>IZAX AGENCY</h2><p>Bill No: ${b.id} | Date: ${b.date}</p><p>Client: ${b.client}</p><hr><table><tr><td>${b.item}</td><td style="text-align:right">₹${b.price}</td></tr><tr><td>Advance</td><td style="text-align:right;color:green">- ₹${b.adv}</td></tr></table><hr><div style="display:flex;justify-content:space-between"><span>Balance:</span><span class="total">₹${b.bal}</span></div><br><button class="btn btn2" onclick="shareBill('${b.id}')">WhatsApp la Anuppu</button></div>`;
+alert('Bill Ready ✓'); }
+function shareBill(id){ let b=bills.find(x=>x.id===id); let txt=`IZAX AGENCY - Bill\nBill No: ${b.id}\nClient: ${b.client}\nVelai: ${b.item}\nTotal: ₹${b.price}\nAdvance: ₹${b.adv}\nBalance: ₹${b.bal}`; window.open('https://wa.me/?text='+encodeURIComponent(txt)); }
+function exportData(){ let txt='IZAX DATA\n\nClients:\n'+clients.map(c=>c.name+' - '+c.phone).join('\n')+'\n\nBills:\n'+bills.map(b=>b.id+' | '+b.client+' | ₹'+b.price).join('\n'); let a=document.createElement('a'); a.href='data:text/plain,'+encodeURIComponent(txt); a.download='izax-data.txt'; a.click(); }
+function render(){
+document.getElementById('tClients').textContent=clients.length;
+document.getElementById('tProjects').textContent=projects.length;
+let inc=bills.reduce((a,b)=>a+b.adv,0), pend=bills.reduce((a,b)=>a+b.bal,0);
+document.getElementById('tIncome').textContent='₹'+inc;
+document.getElementById('tPending').textContent='₹'+pend;
+document.getElementById('clientList').innerHTML=clients.map((c,i)=>`<div class="item"><div><b>${c.name}</b><small>${c.phone} • ${c.work}</small></div><button class="del" onclick="clients.splice(${i},1);save()">×</button></div>`).join('')||'<p style="color:#888;text-align:center">Innum client illa. Mela add pannu.</p>';
+document.getElementById('projectList').innerHTML=projects.map((p,i)=>`<div class="item"><div><b>${p.name}</b><small>${p.client} • ${p.type} • ₹${p.price}</small></div><div style="display:flex;align-items:center"><span class="badge ${p.status==='Done'?'done':'pending'}">${p.status}</span><button class="del" onclick="projects.splice(${i},1);save()">×</button></div></div>`).join('')||'<p style="color:#888;text-align:center">Innum project illa.</p>';
+document.getElementById('billList').innerHTML=bills.map((b,i)=>`<div class="item"><div><b>${b.id} - ${b.client}</b><small>${b.item} • Total ₹${b.price} • Balance ₹${b.bal}</small></div><button class="btn2" style="padding:8px 12px;border-radius:8px;border:none;font-weight:600" onclick="shareBill('${b.id}')">Share</button></div>`).join('')||'<p style="color:#888;text-align:center">Innum bill illa.</p>';
+let opts=clients.map(c=>`<option>${c.name}</option>`).join('');
+document.getElementById('pClient').innerHTML=opts||'<option>Client illa</option>';
+document.getElementById('bClient').innerHTML=opts||'<option>Client illa</option>';
+}
+render();
+</script>
+</body>
+</html>
