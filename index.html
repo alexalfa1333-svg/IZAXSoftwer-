@@ -385,4 +385,199 @@
   <div class="floating-btn" onclick="showTab('billing', document.querySelectorAll('.tab')[2])">+ Create New Bill</div>
 
   <!-- ================= JAVASCRIPT ================= -->
-  <script
+  <script>
+    // ------------------------------------------------
+    // DATA STORAGE - Using LocalStorage
+    // ------------------------------------------------
+    let clients = JSON.parse(localStorage.getItem('izax_clients') || '[]');
+    let projects = JSON.parse(localStorage.getItem('izax_projects') || '[]');
+    let bills = JSON.parse(localStorage.getItem('izax_bills') || '[]');
+
+    // ------------------------------------------------
+    // SAVE DATA TO LOCALSTORAGE
+    // ------------------------------------------------
+    function saveData() {
+      localStorage.setItem('izax_clients', JSON.stringify(clients));
+      localStorage.setItem('izax_projects', JSON.stringify(projects));
+      localStorage.setItem('izax_bills', JSON.stringify(bills));
+      renderAll();
+    }
+
+    // ------------------------------------------------
+    // TAB SWITCHING
+    // ------------------------------------------------
+    function showTab(tabId, element) {
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      element.classList.add('active');
+
+      ['clients', 'projects', 'billing', 'bills'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      document.getElementById(tabId).classList.remove('hidden');
+    }
+
+    // ------------------------------------------------
+    // ADD NEW CLIENT
+    // ------------------------------------------------
+    function addClient() {
+      const name = document.getElementById('clientName').value.trim();
+      const phone = document.getElementById('clientPhone').value.trim();
+      const work = document.getElementById('clientWork').value.trim();
+
+      if (!name) return alert('Please enter client name');
+
+      clients.push({ name, phone, work });
+
+      document.getElementById('clientName').value = '';
+      document.getElementById('clientPhone').value = '';
+      document.getElementById('clientWork').value = '';
+
+      saveData();
+      alert('Client Saved Successfully ✓');
+    }
+
+    // ------------------------------------------------
+    // ADD NEW PROJECT
+    // ------------------------------------------------
+    function addProject() {
+      const client = document.getElementById('projectClient').value;
+      const name = document.getElementById('projectName').value.trim();
+      const type = document.getElementById('projectType').value;
+      const price = document.getElementById('projectPrice').value;
+      const status = document.getElementById('projectStatus').value;
+
+      if (!name) return alert('Please enter project name');
+
+      projects.push({ client, name, type, price: +price || 0, status });
+      saveData();
+      alert('Project Saved Successfully ✓');
+    }
+
+    // ------------------------------------------------
+    // CALCULATE BILL BALANCE
+    // ------------------------------------------------
+    function calculateBalance() {
+      const price = +document.getElementById('billPrice').value || 0;
+      const advance = +document.getElementById('billAdvance').value || 0;
+      document.getElementById('billBalance').textContent = '₹' + (price - advance);
+    }
+
+    // ------------------------------------------------
+    // CREATE NEW BILL
+    // ------------------------------------------------
+    function createBill() {
+      const client = document.getElementById('billClient').value;
+      const item = document.getElementById('billItem').value.trim();
+      const price = +document.getElementById('billPrice').value || 0;
+      const advance = +document.getElementById('billAdvance').value || 0;
+
+      if (!item) return alert('Please enter work description');
+
+      const billId = 'IZAX-' + (1000 + bills.length + 1);
+      const newBill = {
+        id: billId,
+        client,
+        item,
+        price,
+        advance,
+        balance: price - advance,
+        date: new Date().toLocaleDateString('en-IN')
+      };
+
+      bills.push(newBill);
+      saveData();
+
+      // Show Bill Preview
+      document.getElementById('billPreview').innerHTML = `
+        <div class="bill-preview">
+          <h2>IZAX AGENCY</h2>
+          <p>Bill No: ${newBill.id} | Date: ${newBill.date}</p>
+          <p>Client: ${newBill.client}</p>
+          <hr>
+          <table>
+            <tr><td>${newBill.item}</td><td style="text-align:right">₹${newBill.price}</td></tr>
+            <tr><td>Advance</td><td style="text-align:right;color:green">- ₹${newBill.advance}</td></tr>
+          </table>
+          <hr>
+          <div style="display:flex;justify-content:space-between">
+            <span>Balance:</span>
+            <span class="bill-total">₹${newBill.balance}</span>
+          </div>
+          <br>
+          <button class="btn-primary btn-secondary" onclick="shareBill('${newBill.id}')">Share on WhatsApp</button>
+        </div>
+      `;
+      alert('Bill Created Successfully ✓');
+    }
+
+    // ------------------------------------------------
+    // SHARE BILL ON WHATSAPP
+    // ------------------------------------------------
+    function shareBill(billId) {
+      const bill = bills.find(b => b.id === billId);
+      const message = `IZAX AGENCY - Bill\nBill No: ${bill.id}\nClient: ${bill.client}\nWork: ${bill.item}\nTotal: ₹${bill.price}\nAdvance: ₹${bill.advance}\nBalance: ₹${bill.balance}`;
+      window.open('https://wa.me/?text=' + encodeURIComponent(message));
+    }
+
+    // ------------------------------------------------
+    // EXPORT ALL DATA AS TEXT FILE
+    // ------------------------------------------------
+    function exportData() {
+      const text = 'IZAX DATA\n\nClients:\n' + clients.map(c => c.name + ' - ' + c.phone).join('\n') + '\n\nBills:\n' + bills.map(b => b.id + ' | ' + b.client + ' | ₹' + b.price).join('\n');
+      const link = document.createElement('a');
+      link.href = 'data:text/plain,' + encodeURIComponent(text);
+      link.download = 'izax-data.txt';
+      link.click();
+    }
+
+    // ------------------------------------------------
+    // RENDER ALL DATA ON SCREEN
+    // ------------------------------------------------
+    function renderAll() {
+      // Update Dashboard Stats
+      document.getElementById('totalClients').textContent = clients.length;
+      document.getElementById('totalProjects').textContent = projects.length;
+
+      const totalIncome = bills.reduce((sum, bill) => sum + bill.advance, 0);
+      const totalPending = bills.reduce((sum, bill) => sum + bill.balance, 0);
+      document.getElementById('totalIncome').textContent = '₹' + totalIncome;
+      document.getElementById('totalPending').textContent = '₹' + totalPending;
+
+      // Render Clients List
+      document.getElementById('clientList').innerHTML = clients.map((client, index) => `
+        <div class="list-item">
+          <div><b>${client.name}</b><small>${client.phone} • ${client.work}</small></div>
+          <button class="btn-delete" onclick="clients.splice(${index},1);saveData()">×</button>
+        </div>
+      `).join('') || '<p class="empty-text">No clients yet. Add one above.</p>';
+
+      // Render Projects List
+      document.getElementById('projectList').innerHTML = projects.map((project, index) => `
+        <div class="list-item">
+          <div><b>${project.name}</b><small>${project.client} • ${project.type} • ₹${project.price}</small></div>
+          <div style="display:flex;align-items:center">
+            <span class="badge ${project.status === 'Done' ? 'done' : project.status === 'Working' ? 'working' : 'pending'}">${project.status}</span>
+            <button class="btn-delete" onclick="projects.splice(${index},1);saveData()">×</button>
+          </div>
+        </div>
+      `).join('') || '<p class="empty-text">No projects yet.</p>';
+
+      // Render Bills List
+      document.getElementById('billList').innerHTML = bills.map((bill) => `
+        <div class="list-item">
+          <div><b>${bill.id} - ${bill.client}</b><small>${bill.item} • Total ₹${bill.price} • Balance ₹${bill.balance}</small></div>
+          <button class="btn-secondary" style="padding:8px 14px;border-radius:999px;border:none;font-weight:600;color:#0071e3;cursor:pointer" onclick="shareBill('${bill.id}')">Share</button>
+        </div>
+      `).join('') || '<p class="empty-text">No bills yet.</p>';
+
+      // Update Client Dropdowns
+      const clientOptions = clients.map(c => `<option>${c.name}</option>`).join('');
+      document.getElementById('projectClient').innerHTML = clientOptions || '<option>No Client</option>';
+      document.getElementById('billClient').innerHTML = clientOptions || '<option>No Client</option>';
+    }
+
+    // Initial Render
+    renderAll();
+  </script>
+</body>
+</html>
